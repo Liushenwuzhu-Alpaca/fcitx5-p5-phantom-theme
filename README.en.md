@@ -60,7 +60,7 @@ font. Do not redistribute the P5 Hatty font file with this project.
 
 ## Development
 
-Edit `scripts/generate_assets.py` to tune colors, zigzag size, corner cuts, etc. Then rerun:
+Edit `scripts/generate_assets.py` to tune colors, border width, arrow shape, etc. Then rerun:
 
 ```bash
 python scripts/generate_assets.py
@@ -78,11 +78,7 @@ p5-skin/
 │   └── p5-phantom-skin/        # Installable fcitx5 theme
 │       ├── theme.conf
 │       ├── panel.svg
-│       ├── highlight.svg
-│       ├── menu-panel.svg
-│       ├── menu-highlight.svg
-│       ├── arrow.svg
-│       └── checkbox.svg
+│       └── highlight.svg
 ├── docs/
 │   ├── IMPLEMENTATION.md       # Implementation plan
 │   └── preview.png             # Screenshot preview

@@ -78,11 +78,7 @@ p5-skin/
 │   └── p5-phantom-skin/        # 可直接安装的 fcitx5 主题
 │       ├── theme.conf
 │       ├── panel.svg
-│       ├── highlight.svg
-│       ├── menu-panel.svg
-│       ├── menu-highlight.svg
-│       ├── arrow.svg
-│       └── checkbox.svg
+│       └── highlight.svg
 ├── docs/
 │   ├── IMPLEMENTATION.md       # 实现方案
 │   └── preview.png             # 截图预览
