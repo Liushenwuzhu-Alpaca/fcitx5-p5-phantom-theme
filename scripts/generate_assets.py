@@ -158,86 +158,49 @@ def button_svg_content(
 def generate_panel(
     width: int = 240,
     height: int = 96,
-    teeth: int = 36,
-    zigzag_amp: float = 4.5,
-    strip_height: float = 7.0,
+    border: float = 6.0,
+    chamfer: float = 8.0,
 ) -> str:
-    """Input panel background: black field with torn red strips at top/bottom."""
+    """Input panel background: black field with a clean white frame and small chamfers."""
     p = PALETTE
 
-    # Solid black background so the panel stays dark even when 9-patch margins overlap.
-    bg = f'  <rect x="0" y="0" width="{width}" height="{height}" fill="{p.black}"/>\n'
-
-    # Thin torn red strips along the top and bottom edges.
-    top_y = strip_height
-    bottom_y = height - strip_height
-    top_zig = jagged_path(0, top_y, width, top_y, teeth, -zigzag_amp, seed=1)
-    bottom_zig = jagged_path(width, bottom_y, 0, bottom_y, teeth, zigzag_amp, seed=2)
-
-    top_strip = f"{top_zig} L {width} 0 L 0 0 Z"
-    bottom_strip = f"{bottom_zig} L 0 {height} L {width} {height} Z"
-
-    # White jagged accent line just inside the top red strip.
-    accent_zig = jagged_path(
-        16,
-        top_y + 3,
-        width - 16,
-        top_y + 3,
-        teeth,
-        -zigzag_amp * 0.4,
-        seed=3,
+    # White outer frame built from two filled chamfered rectangles.
+    # This avoids anti-aliasing stroke artifacts that look like锯齿.
+    outer = chamfered_rect_path(0, 0, width, height, chamfer)
+    inner = chamfered_rect_path(
+        border,
+        border,
+        width - border * 2,
+        height - border * 2,
+        max(chamfer - border, 0),
     )
 
-    # A subtle white chamfered inner frame for the layered P5 button look.
-    frame = chamfered_rect_path(5, 5, width - 10, height - 10, 10)
-
-    # Signature P5 stars in the corners.
-    star1 = star_path(12, 10, 5.5, 2.2)
-    star2 = star_path(width - 12, height - 10, 5.5, 2.2)
+    # Decorative stars.
+    star1 = star_path(14, 14, 5, 2)
+    star2 = star_path(width - 14, 14, 5, 2)
+    star3 = star_path(width - 14, height - 14, 4, 1.6)
 
     content = (
-        f"{bg}"
-        f'  <path d="{top_strip}" fill="{p.crimson}"/>\n'
-        f'  <path d="{bottom_strip}" fill="{p.crimson}"/>\n'
-        f'  <path d="{accent_zig}" fill="none" stroke="{p.white}" '
-        f'stroke-width="1" opacity="0.85"/>\n'
-        f'  <path d="{frame}" fill="none" stroke="{p.white}" '
-        f'stroke-width="1.5" opacity="0.6" stroke-linejoin="round"/>\n'
-        f'  <path d="{star1}" fill="{p.white}"/>\n'
-        f'  <path d="{star2}" fill="{p.white}"/>\n'
+        f'  <path d="{outer}" fill="{p.white}" shape-rendering="crispEdges"/>\n'
+        f'  <path d="{inner}" fill="{p.black}" shape-rendering="crispEdges"/>\n'
+        f'  <path d="{star1}" fill="none" stroke="{p.white}" stroke-width="1.5"/>\n'
+        f'  <path d="{star2}" fill="{p.crimson}"/>\n'
+        f'  <path d="{star3}" fill="none" stroke="{p.white}" stroke-width="1.2"/>\n'
     )
     return svg_root(width, height, content)
 
 
 def generate_highlight(
     width: int = 160,
-    height: int = 44,
-    pad: int = 6,
-    chamfer: float = 8.0,
+    height: int = 40,
+    pad: int = 4,
 ) -> str:
-    """Candidate highlight: a black chamfered button with white border and red shadow."""
+    """Candidate highlight: a flat red rectangle for the selected candidate."""
     p = PALETTE
-    bw = width - pad * 2
-    bh = height - pad * 2
-    content = button_svg_content(
-        pad,
-        pad,
-        bw,
-        bh,
-        chamfer,
-        shadow_dx=4,
-        shadow_dy=4,
-        fill=p.black,
-        border=p.white,
-        shadow=p.dark_red,
-        border_width=3,
-        inset_width=4,
-    )
-    # Red vertical accent bar + white star on the left side of the button.
-    accent_bar = chamfered_rect_path(pad + 4, pad + 4, 5, bh - 8, 1)
-    star = star_path(pad + 14, height / 2, 4.5, 1.8)
-    content += (
-        f'  <path d="{accent_bar}" fill="{p.crimson}"/>\n'
+    body = chamfered_rect_path(pad, pad, width - pad * 2, height - pad * 2, 3)
+    star = star_path(pad + 8, height / 2, 4, 1.6)
+    content = (
+        f'  <path d="{body}" fill="{p.crimson}"/>\n'
         f'  <path d="{star}" fill="{p.white}"/>\n'
     )
     return svg_root(width, height, content)
@@ -246,85 +209,51 @@ def generate_highlight(
 def generate_menu_panel(
     width: int = 180,
     height: int = 80,
-    teeth: int = 28,
-    zigzag_amp: float = 3.5,
-    strip_height: float = 6.0,
+    border: float = 5.0,
+    chamfer: float = 6.0,
 ) -> str:
-    """Right-click menu background: same black-field + torn red strips, smaller scale."""
+    """Right-click menu background: black field with a clean white frame."""
     p = PALETTE
 
-    bg = f'  <rect x="0" y="0" width="{width}" height="{height}" fill="{p.black}"/>\n'
-
-    top_y = strip_height
-    bottom_y = height - strip_height
-    top_zig = jagged_path(0, top_y, width, top_y, teeth, -zigzag_amp, seed=7)
-    bottom_zig = jagged_path(width, bottom_y, 0, bottom_y, teeth, zigzag_amp, seed=8)
-
-    top_strip = f"{top_zig} L {width} 0 L 0 0 Z"
-    bottom_strip = f"{bottom_zig} L 0 {height} L {width} {height} Z"
-
-    accent_zig = jagged_path(
-        12,
-        top_y + 2,
-        width - 12,
-        top_y + 2,
-        teeth,
-        -zigzag_amp * 0.4,
-        seed=9,
+    outer = chamfered_rect_path(0, 0, width, height, chamfer)
+    inner = chamfered_rect_path(
+        border,
+        border,
+        width - border * 2,
+        height - border * 2,
+        max(chamfer - border, 0),
     )
 
-    frame = chamfered_rect_path(4, 4, width - 8, height - 8, 8)
-    star = star_path(10, 8, 4.5, 1.8)
+    star1 = star_path(12, 12, 4, 1.6)
+    star2 = star_path(width - 12, 12, 4, 1.6)
 
     content = (
-        f"{bg}"
-        f'  <path d="{top_strip}" fill="{p.crimson}"/>\n'
-        f'  <path d="{bottom_strip}" fill="{p.crimson}"/>\n'
-        f'  <path d="{accent_zig}" fill="none" stroke="{p.white}" '
-        f'stroke-width="1" opacity="0.8"/>\n'
-        f'  <path d="{frame}" fill="none" stroke="{p.white}" '
-        f'stroke-width="1.5" opacity="0.55" stroke-linejoin="round"/>\n'
-        f'  <path d="{star}" fill="{p.white}"/>\n'
+        f'  <path d="{outer}" fill="{p.white}" shape-rendering="crispEdges"/>\n'
+        f'  <path d="{inner}" fill="{p.black}" shape-rendering="crispEdges"/>\n'
+        f'  <path d="{star1}" fill="none" stroke="{p.white}" stroke-width="1.2"/>\n'
+        f'  <path d="{star2}" fill="{p.crimson}"/>\n'
     )
     return svg_root(width, height, content)
 
 
 def generate_menu_highlight(
     width: int = 160,
-    height: int = 30,
-    pad: int = 5,
-    chamfer: float = 5.0,
+    height: int = 28,
+    pad: int = 3,
 ) -> str:
-    """Menu item highlight: smaller chamfered button with red shadow."""
+    """Menu item highlight: a flat red rectangle for the selected menu item."""
     p = PALETTE
-    bw = width - pad * 2
-    bh = height - pad * 2
-    content = button_svg_content(
-        pad,
-        pad,
-        bw,
-        bh,
-        chamfer,
-        shadow_dx=3,
-        shadow_dy=3,
-        fill=p.black,
-        border=p.white,
-        shadow=p.dark_red,
-        border_width=2.5,
-        inset_width=3,
-    )
-    # Red vertical accent bar + white star on the left side of the button.
-    accent_bar = chamfered_rect_path(pad + 3, pad + 3, 4, bh - 6, 1)
-    star = star_path(pad + 11, height / 2, 3.5, 1.4)
-    content += (
-        f'  <path d="{accent_bar}" fill="{p.crimson}"/>\n'
+    body = chamfered_rect_path(pad, pad, width - pad * 2, height - pad * 2, 2)
+    star = star_path(pad + 7, height / 2, 3.5, 1.4)
+    content = (
+        f'  <path d="{body}" fill="{p.crimson}"/>\n'
         f'  <path d="{star}" fill="{p.white}"/>\n'
     )
     return svg_root(width, height, content)
 
 
 def generate_arrow(size: int = 16) -> str:
-    """Submenu arrow: a sharp right chevron with a white outline."""
+    """Submenu arrow: a simple white right-pointing triangle."""
     p = PALETTE
     path_d = (
         f"M 1,{size * 0.25} "
@@ -335,10 +264,7 @@ def generate_arrow(size: int = 16) -> str:
         f"L {size * 0.625},{size * 0.75} "
         f"L 1,{size * 0.75} Z"
     )
-    content = (
-        f'  <path d="{path_d}" fill="{p.crimson}" stroke="{p.white}" '
-        f'stroke-width="2" stroke-linejoin="round"/>\n'
-    )
+    content = f'  <path d="{path_d}" fill="{p.white}"/>\n'
     return svg_root(size, size, content)
 
 
