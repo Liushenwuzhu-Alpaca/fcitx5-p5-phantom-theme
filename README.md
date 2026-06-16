@@ -82,7 +82,8 @@ p5-skin/
 ├── docs/
 │   ├── IMPLEMENTATION.md       # 实现方案
 │   └── preview.png             # 截图预览
-└── README.md
+├── README.md                   # 中文
+└── README.en.md                # 英文
 ```
 
 ## 许可证
