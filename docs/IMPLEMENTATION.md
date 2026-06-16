@@ -1,0 +1,231 @@
+# Implementation Plan: Persona 5 Style Fcitx5 Skin
+
+## Goal
+
+Build a fcitx5 input method skin inspired by the visual style of *Persona 5*.
+
+- Primary palette: black background + crimson red `#cc0000`
+- Borders: red zigzag / torn-paper edges
+- Highlight: red selection + white text
+- Menus and arrows: simple geometric shapes
+- All assets are original SVG to avoid copyright issues
+
+## Project Structure
+
+```text
+p5-skin/
+├── README.md
+├── LICENSE
+├── theme.conf                    # Main skin configuration
+├── assets/
+│   ├── panel.svg                 # Input panel background (9-patch)
+│   ├── highlight.svg             # Candidate highlight background
+│   ├── menu-panel.svg            # Right-click menu background
+│   ├── menu-highlight.svg        # Menu highlight background
+│   ├── arrow.svg                 # Submenu arrow
+│   └── checkbox.svg              # Menu checkbox
+├── scripts/
+│   └── generate_assets.py        # Parameterized SVG generator
+└── dist/
+    └── p5-phantom-skin/          # Final installable skin package
+        ├── theme.conf
+        └── *.svg
+```
+
+## Implementation Steps
+
+### 1. Parameterized SVG Asset Generation
+
+Use a Python script to generate all SVG assets so dimensions, colors, and zigzag parameters can be tuned easily.
+
+Key parameters for each SVG:
+
+- Canvas size (designed for HiDPI, e.g. 200x80)
+- Fill color and border color
+- Zigzag height / density
+- 9-patch margins (must match `theme.conf` Margins)
+
+Run the generator:
+
+```bash
+python scripts/generate_assets.py
+```
+
+Output goes to `dist/p5-phantom-skin/`.
+
+### 2. theme.conf Configuration
+
+```ini
+[Metadata]
+Name=P5 Phantom
+Version=1
+Author=<your-name>
+Description=A fcitx5 skin inspired by Persona 5 UI
+ScaleWithDPI=True
+
+[InputPanel]
+NormalColor=#ffffffff
+HighlightCandidateColor=#ffffffff
+HighlightColor=#ffffffff
+HighlightBackgroundColor=#00000000
+Spacing=8
+
+[InputPanel/Background]
+Image=panel.svg
+Color=#1a1a1aff
+BorderColor=#cc0000ff
+BorderWidth=0
+
+[InputPanel/Background/Margin]
+Left=20
+Right=20
+Top=16
+Bottom=16
+
+[InputPanel/Highlight]
+Image=highlight.svg
+Color=#cc0000ff
+BorderColor=#00000000
+
+[InputPanel/Highlight/Margin]
+Left=16
+Right=16
+Top=8
+Bottom=8
+
+[InputPanel/TextMargin]
+Left=12
+Right=12
+Top=6
+Bottom=6
+
+[InputPanel/ContentMargin]
+Left=4
+Right=4
+Top=4
+Bottom=4
+
+[InputPanel/BlurMargin]
+Left=16
+Right=16
+Top=16
+Bottom=16
+
+[Menu]
+NormalColor=#ffffffff
+HighlightCandidateColor=#ffffffff
+Spacing=4
+
+[Menu/Background]
+Image=menu-panel.svg
+Color=#1a1a1aff
+BorderColor=#cc0000ff
+BorderWidth=0
+
+[Menu/Background/Margin]
+Left=16
+Right=16
+Top=12
+Bottom=12
+
+[Menu/Highlight]
+Image=menu-highlight.svg
+Color=#cc0000ff
+
+[Menu/Highlight/Margin]
+Left=12
+Right=12
+Top=6
+Bottom=6
+
+[Menu/TextMargin]
+Left=10
+Right=10
+Top=5
+Bottom=5
+
+[Menu/ContentMargin]
+Left=4
+Right=4
+Top=4
+Bottom=4
+
+[Menu/Separator]
+Color=#cc0000ff
+
+[Menu/CheckBox]
+Image=checkbox.svg
+
+[Menu/SubMenu]
+Image=arrow.svg
+```
+
+### 3. SVG Design Specs
+
+#### panel.svg (input panel background)
+
+- Size: 240x96 px
+- Fill: `#1a1a1a`
+- Top/bottom edges: red zigzag, height 6-8 px
+- Left/right edges: slight slant or irregular cut
+- 9-patch Margin: top/bottom 20 px (protect zigzag from stretching), left/right 20 px
+
+#### highlight.svg (candidate highlight)
+
+- Size: 160x48 px
+- Fill: `#cc0000`
+- Edges: slight zigzag or straight
+- Margin: top/bottom 8 px, left/right 16 px
+
+#### menu-panel.svg / menu-highlight.svg
+
+- Same visual style as the main panel, smaller dimensions
+
+#### arrow.svg / checkbox.svg
+
+- Size: 16x16 px
+- Red or white line art
+- Arrow: long triangle
+- Checkbox: square box + check mark
+
+## Technical Notes
+
+1. **9-patch margins must match SVG design**
+   - `[Background/Margin]` in `theme.conf` defines the unstretchable regions.
+   - Zigzag edges must sit inside the protected margin; otherwise stretching will deform them.
+
+2. **SVG is preferred over PNG**
+   - Scales cleanly on HiDPI displays.
+   - Fcitx5 supports SVG backgrounds (used by Fluent-fcitx5 and others).
+
+3. **Fonts are not bundled in the skin**
+   - Fcitx5 fonts are configured in `~/.config/fcitx5/conf/classicui.conf`.
+   - README should recommend **Noto Sans CJK SC Bold** or guide users to install a decorative font themselves.
+
+4. **Blur effects are optional**
+   - `BlurMargin` only works on KDE/KWin; other desktops ignore it safely.
+
+## Development Workflow
+
+```bash
+# 1. Generate or tweak assets
+python scripts/generate_assets.py
+
+# 2. Install locally for testing
+mkdir -p ~/.local/share/fcitx5/themes/
+cp -r dist/p5-phantom-skin ~/.local/share/fcitx5/themes/
+fcitx5 -r
+
+# 3. Switch theme in fcitx5-configtool and inspect
+
+# 4. Iterate
+# Edit scripts/generate_assets.py, regenerate, copy, and restart fcitx5
+```
+
+## Copyright and Licensing
+
+- Project license: **MIT**
+- README must include a `fan-made, not affiliated with Atlus/SEGA` disclaimer.
+- All SVG assets are generated by the project's own script.
+- Do not include the P5 Hatty font file; point users to install it themselves for personal use.
+- Project name suggestion: `p5-phantom-skin` or `phantom-fcitx5-skin`.

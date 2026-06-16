@@ -1,0 +1,30 @@
+# Local agent instructions
+AGENTS.md
+
+# Reference images and screenshots
+images/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Ruff cache
+.ruff_cache/
+
+# Local font files
+*.ttf
+*.otf
+*.ttc
+*.woff
+*.woff2
+*.eot
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
