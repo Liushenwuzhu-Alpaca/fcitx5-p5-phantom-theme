@@ -11,7 +11,7 @@
 
 受《Persona 5》UI 风格启发的 fcitx5 输入法皮肤。
 
-- 黑色标签形面板 + 厚实白色外框 + 右侧钝角箭头
+- 黑色标签形面板 + 白色边框 + 右侧钝角箭头
 - 选中候选为红色矩形 + 白色文字
 - 所有 SVG 素材由 `scripts/generate_assets.py` 参数化生成
 - 可安全开源分发（不包含任何官方游戏素材）
@@ -30,7 +30,7 @@ python scripts/generate_assets.py
 
 # 3. 复制皮肤到 fcitx5 主题目录
 mkdir -p ~/.local/share/fcitx5/themes/
-cp -r dist/p5-phantom-skin ~/.local/share/fcitx5/themes/
+cp -r dist/p5-phantom-skin ~/.local/share/fcitx5/themes/p5-phantom
 
 # 4. 设置主题
 # 方式 A：使用 fcitx5-configtool
@@ -39,8 +39,8 @@ fcitx5-configtool
 
 # 方式 B：直接编辑配置文件
 # ~/.config/fcitx5/conf/classicui.conf
-# Theme=P5 Phantom
-# DarkTheme=P5 Phantom
+# Theme=p5-phantom
+# DarkTheme=p5-phantom
 
 # 5. 重启 fcitx5
 fcitx5 -r
@@ -50,13 +50,21 @@ fcitx5 -r
 
 皮肤本身不捆绑字体。要获得最佳效果，推荐使用粗体无衬线字体：
 
-```ini
-# ~/.config/fcitx5/conf/classicui.conf
-Font="Noto Sans CJK SC Bold 13"
+```bash
+# Fedora
+sudo dnf install google-noto-sans-cjk-fonts
+
+# Arch Linux
+sudo pacman -S noto-fonts-cjk
 ```
 
-如需更装饰性的 P5 风格，可自行安装 **P5 Hatty** 字体（仅限个人使用）并设置为字体。
-**请勿将 P5 Hatty 字体文件与本项目一起分发。**
+然后在 `~/.config/fcitx5/conf/classicui.conf` 中设置：
+
+```ini
+Font="Noto Sans CJK SC Bold 13"
+MenuFont="Noto Sans CJK SC Bold 13"
+TrayFont="Noto Sans CJK SC Bold 10"
+```
 
 ## 开发
 
@@ -64,7 +72,7 @@ Font="Noto Sans CJK SC Bold 13"
 
 ```bash
 python scripts/generate_assets.py
-cp -r dist/p5-phantom-skin ~/.local/share/fcitx5/themes/
+cp -r dist/p5-phantom-skin ~/.local/share/fcitx5/themes/p5-phantom
 fcitx5 -r
 ```
 
@@ -80,7 +88,6 @@ p5-skin/
 │       ├── panel.svg
 │       └── highlight.svg
 ├── docs/
-│   ├── IMPLEMENTATION.md       # 实现方案
 │   └── preview.png             # 截图预览
 ├── README.md                   # 中文
 └── README.en.md                # 英文
