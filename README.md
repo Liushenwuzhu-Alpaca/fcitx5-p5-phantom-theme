@@ -11,8 +11,10 @@
 
 受《Persona 5》UI 风格启发的 fcitx5 输入法皮肤。
 
-- 黑色标签形面板 + 白色边框 + 右侧钝角箭头
-- 选中候选为红色矩形 + 白色文字
+- "怪盗指令" 设计: 斜切黑色标签面板 + 白色粗描边 + 右下错位红色底板 + 红色细条纹
+- 选中候选翻转为白底黑字的斜标签, 后面垫一块错位红块
+- 右下角红色网点 Overlay 贴图, 固定尺寸不受拉伸影响
+- 翻页箭头为带红色投影的白色尖角
 - 所有 SVG 素材由 `scripts/generate_assets.py` 参数化生成
 - 可安全开源分发（不包含任何官方游戏素材）
 
@@ -68,7 +70,7 @@ TrayFont="Noto Sans CJK SC Bold 10"
 
 ## 开发
 
-编辑 `scripts/generate_assets.py` 可调整颜色、边框粗细、箭头形状等参数：
+编辑 `scripts/generate_assets.py` 可调整颜色、叠块位置、斜切量、网点密度等参数：
 
 ```bash
 python scripts/generate_assets.py
@@ -85,8 +87,11 @@ p5-skin/
 ├── dist/
 │   └── p5-phantom-skin/        # 可直接安装的 fcitx5 主题
 │       ├── theme.conf
-│       ├── panel.svg
-│       └── highlight.svg
+│       ├── panel.svg           # 输入面板背景 (斜切叠层)
+│       ├── highlight.svg       # 选中候选高亮 (白色斜标签)
+│       ├── halftone.svg        # 面板网点 Overlay 贴图
+│       ├── prev.svg            # 上一页箭头
+│       └── next.svg            # 下一页箭头
 ├── docs/
 │   └── preview.png             # 截图预览
 ├── README.md                   # 中文

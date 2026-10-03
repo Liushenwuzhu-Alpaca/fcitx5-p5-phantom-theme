@@ -4,10 +4,11 @@
 
 Build a fcitx5 input method skin inspired by the visual style of *Persona 5*.
 
-- Primary palette: black background + crimson red `#cc0000`
-- Borders: red zigzag / torn-paper edges
-- Highlight: red selection + white text
-- Menus and arrows: simple geometric shapes
+- Primary palette: black background + crimson red `#E5191C` + white
+- Panel: skewed black tag with a thick white outline and an offset crimson
+  backing slab ("怪盗指令" / Command)
+- Highlight: white skewed tag with black text over a small crimson slab
+- Overlay decals (halftone dots, page-button shadows) stay fixed-size
 - All assets are original SVG to avoid copyright issues
 
 ## Project Structure
@@ -16,34 +17,31 @@ Build a fcitx5 input method skin inspired by the visual style of *Persona 5*.
 p5-skin/
 ├── README.md
 ├── LICENSE
-├── theme.conf                    # Main skin configuration
-├── assets/
-│   ├── panel.svg                 # Input panel background (9-patch)
-│   ├── highlight.svg             # Candidate highlight background
-│   ├── menu-panel.svg            # Right-click menu background
-│   ├── menu-highlight.svg        # Menu highlight background
-│   ├── arrow.svg                 # Submenu arrow
-│   └── checkbox.svg              # Menu checkbox
 ├── scripts/
 │   └── generate_assets.py        # Parameterized SVG generator
 └── dist/
     └── p5-phantom-skin/          # Final installable skin package
         ├── theme.conf
-        └── *.svg
+        ├── panel.svg             # Input panel background (9-patch)
+        ├── highlight.svg         # Candidate highlight background
+        ├── halftone.svg          # Panel overlay decal
+        ├── prev.svg              # Previous page button
+        └── next.svg              # Next page button
 ```
 
 ## Implementation Steps
 
 ### 1. Parameterized SVG Asset Generation
 
-Use a Python script to generate all SVG assets so dimensions, colors, and zigzag parameters can be tuned easily.
+Use `scripts/generate_assets.py` to generate all SVG assets so dimensions,
+colors, slab insets and skew amounts can be tuned easily.
 
-Key parameters for each SVG:
+Key parameters:
 
-- Canvas size (designed for HiDPI, e.g. 200x80)
-- Fill color and border color
-- Zigzag height / density
-- 9-patch margins (must match `theme.conf` Margins)
+- Canvas size and 9-patch margins (must match `theme.conf` margins)
+- Slab rectangles (crimson backing, white outline, black core) and skew
+- Pinstripe offset/height inside the black slab
+- Halftone dot spacing, radius falloff and opacity
 
 Run the generator:
 
@@ -51,159 +49,81 @@ Run the generator:
 python scripts/generate_assets.py
 ```
 
-Output goes to `dist/p5-phantom-skin/`.
+Output goes to `dist/p5-phantom-skin/`. `theme.conf` is written alongside the
+SVGs (pass `--no-conf` to leave an existing `theme.conf` untouched).
 
-### 2. theme.conf Configuration
+### 2. 9-Patch Geometry Rules
 
-```ini
-[Metadata]
-Name=P5 Phantom
-Version=1
-Author=<your-name>
-Description=A fcitx5 skin inspired by Persona 5 UI
-ScaleWithDPI=True
+fcitx5 scales each 9-patch tile independently: the top/bottom strips scale
+vertically, the left/right strips horizontally, the center in both axes, and
+the four corners not at all. Sloped edges therefore must live inside the
+fixed corner/edge tiles only:
 
-[InputPanel]
-NormalColor=#ffffffff
-HighlightCandidateColor=#ffffffff
-HighlightColor=#ffffffff
-HighlightBackgroundColor=#00000000
-Spacing=8
+- Every slab keeps horizontal top/bottom edges, so scaling a strip only
+  changes a slab's height, never the shape of its slanted end caps.
+- Slanted end caps sit inside the left/right margin columns.
+- Decorative decals (halftone dots) are Overlays, painted at natural size by
+  Gravity/OverlayOffset and clipped by OverlayClipMargin; they never stretch.
 
-[InputPanel/Background]
-Image=panel.svg
-Color=#1a1a1aff
-BorderColor=#cc0000ff
-BorderWidth=0
+### 3. theme.conf Configuration
 
-[InputPanel/Background/Margin]
-Left=20
-Right=20
-Top=16
-Bottom=16
+The generator emits the matching `theme.conf`. Key sections:
 
-[InputPanel/Highlight]
-Image=highlight.svg
-Color=#cc0000ff
-BorderColor=#00000000
+- `[InputPanel/Background]` — `panel.svg`, Margin L24 R26 T14 B18,
+  `Overlay=halftone.svg` at `Gravity=BottomRight` (44, 22), clipped by
+  OverlayClipMargin L24 R26 T14 B18.
+- `[InputPanel/Highlight]` — `highlight.svg`, Margin L10 R12 T4 B4 so the
+  skewed caps stay in the fixed columns.
+- `[InputPanel/TextMargin]` L6 R8 T4 B4 and
+  `[InputPanel/ContentMargin]` L20 R24 T14 B18 keep text inside the black
+  core slab.
+- `[InputPanel/PrevPage]` / `[InputPanel/NextPage]` — white wedge buttons
+  with a crimson drop shadow.
+- Colors: normal text white, labels bright red `#FF2B2B`, selected candidate
+  black on the white tag, selected label crimson.
 
-[InputPanel/Highlight/Margin]
-Left=16
-Right=16
-Top=8
-Bottom=8
-
-[InputPanel/TextMargin]
-Left=12
-Right=12
-Top=6
-Bottom=6
-
-[InputPanel/ContentMargin]
-Left=4
-Right=4
-Top=4
-Bottom=4
-
-[InputPanel/BlurMargin]
-Left=16
-Right=16
-Top=16
-Bottom=16
-
-[Menu]
-NormalColor=#ffffffff
-HighlightCandidateColor=#ffffffff
-Spacing=4
-
-[Menu/Background]
-Image=menu-panel.svg
-Color=#1a1a1aff
-BorderColor=#cc0000ff
-BorderWidth=0
-
-[Menu/Background/Margin]
-Left=16
-Right=16
-Top=12
-Bottom=12
-
-[Menu/Highlight]
-Image=menu-highlight.svg
-Color=#cc0000ff
-
-[Menu/Highlight/Margin]
-Left=12
-Right=12
-Top=6
-Bottom=6
-
-[Menu/TextMargin]
-Left=10
-Right=10
-Top=5
-Bottom=5
-
-[Menu/ContentMargin]
-Left=4
-Right=4
-Top=4
-Bottom=4
-
-[Menu/Separator]
-Color=#cc0000ff
-
-[Menu/CheckBox]
-Image=checkbox.svg
-
-[Menu/SubMenu]
-Image=arrow.svg
-```
-
-### 3. SVG Design Specs
+### 4. SVG Design Specs
 
 #### panel.svg (input panel background)
 
-- Size: 240x96 px
-- Fill: `#1a1a1a`
-- Top/bottom edges: red zigzag, height 6-8 px
-- Left/right edges: slight slant or irregular cut
-- 9-patch Margin: top/bottom 20 px (protect zigzag from stretching), left/right 20 px
+- Canvas: 460x72 px
+- Crimson backing slab (3, 2)-(457, 66), white outline (6, 6)-(453, 62),
+  black core (10, 10)-(450, 54), all skewed by 12 px on the bottom edge
+- Crimson pinstripe inside the black core, 8 px above its bottom edge
+- Margin: L24 R26 T14 B18
 
 #### highlight.svg (candidate highlight)
 
-- Size: 160x48 px
-- Fill: `#cc0000`
-- Edges: slight zigzag or straight
-- Margin: top/bottom 8 px, left/right 16 px
+- Canvas: 132x30 px
+- Crimson slab shifted down-right behind a white tag, skew 8 px
+- Margin: L10 R12 T4 B4
 
-#### menu-panel.svg / menu-highlight.svg
+#### halftone.svg (panel overlay)
 
-- Same visual style as the main panel, smaller dimensions
+- Canvas: 120x40 px, hexagon-packed dots whose radius fades toward the
+  top-left; crimson at 45% opacity
 
-#### arrow.svg / checkbox.svg
+#### prev.svg / next.svg
 
-- Size: 16x16 px
-- Red or white line art
-- Arrow: long triangle
-- Checkbox: square box + check mark
+- 28x30 px white wedge with a crimson shadow offset by 2.5 px
 
 ## Technical Notes
 
-1. **9-patch margins must match SVG design**
-   - `[Background/Margin]` in `theme.conf` defines the unstretchable regions.
-   - Zigzag edges must sit inside the protected margin; otherwise stretching will deform them.
+1. **9-patch margins must match the SVG design**
+   `[Background/Margin]` in `theme.conf` defines the unstretchable regions;
+   slanted caps must sit inside them or stretching will deform them.
 
 2. **SVG is preferred over PNG**
-   - Scales cleanly on HiDPI displays.
-   - Fcitx5 supports SVG backgrounds (used by Fluent-fcitx5 and others).
+   Scales cleanly on HiDPI displays. fcitx5 supports SVG backgrounds.
 
 3. **Fonts are not bundled in the skin**
-   - Fcitx5 fonts are configured in `~/.config/fcitx5/conf/classicui.conf`.
-   - README should recommend **Noto Sans CJK SC Bold** or guide users to install a decorative font themselves.
+   fcitx5 fonts are configured in `~/.config/fcitx5/conf/classicui.conf`.
+   The README recommends a heavy sans (e.g. Noto Sans CJK SC Bold); users
+   may install `p5hatty` themselves for personal use (do not commit it).
 
-4. **Blur effects are optional**
-   - `BlurMargin` only works on KDE/KWin; other desktops ignore it safely.
+4. **Only one overlay per background**
+   fcitx5 supports a single `Overlay=` per Background and per Highlight, so
+   decals are consolidated into one SVG each.
 
 ## Development Workflow
 
@@ -227,5 +147,5 @@ fcitx5 -r
 - Project license: **MIT**
 - README must include a `fan-made, not affiliated with Atlus/SEGA` disclaimer.
 - All SVG assets are generated by the project's own script.
-- Do not include the P5 Hatty font file; point users to install it themselves for personal use.
-- Project name suggestion: `p5-phantom-skin` or `phantom-fcitx5-skin`.
+- Do not include the P5 Hatty font file; point users to install it themselves
+  for personal use.

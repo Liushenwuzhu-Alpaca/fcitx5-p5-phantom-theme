@@ -7,6 +7,11 @@ A Persona 5 inspired fcitx5 input method skin.
 ```text
 p5-skin/
 ├── dist/p5-phantom-skin/    # Installable fcitx5 theme (theme.conf + SVGs)
+│   ├── panel.svg            # Stacked skewed slabs (crimson/white/black)
+│   ├── highlight.svg        # White skewed tag over a crimson slab
+│   ├── halftone.svg         # Panel overlay decal (BottomRight)
+│   ├── prev.svg / next.svg  # Page buttons
+│   └── theme.conf           # Written by the generator (--no-conf skips it)
 ├── scripts/generate_assets.py # Parameterized SVG generator
 ├── docs/IMPLEMENTATION.md     # Implementation plan
 ├── README.md
