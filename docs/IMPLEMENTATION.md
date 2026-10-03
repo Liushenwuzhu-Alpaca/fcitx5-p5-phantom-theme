@@ -87,16 +87,18 @@ The generator emits the matching `theme.conf`. Key sections:
 #### panel.svg (input panel background)
 
 - Canvas: 460x72 px
-- Crimson backing slab (3, 2)-(457, 66), white outline (6, 6)-(453, 62),
-  black core (10, 10)-(450, 54), all skewed by 12 px on the bottom edge
+- Crimson backing slab (3, 2)-(448, 66), white outline (6, 6)-(441, 62),
+  black core (10, 10)-(438, 54); bottom edges trail right by 12 px so the
+  left edges stay vertical and nothing leaves the canvas
 - Crimson pinstripe inside the black core, 8 px above its bottom edge
-- Margin: L24 R26 T14 B18
+- Margin: L24 R26 T14 B18; the slant lives entirely in the right column
 
 #### highlight.svg (candidate highlight)
 
 - Canvas: 132x30 px
-- Crimson slab shifted down-right behind a white tag, skew 8 px
-- Margin: L10 R12 T4 B4
+- Crimson slab (2, 2)-(122, 26) behind a white tag (4, 4)-(118, 24),
+  bottom edges trailing right by 8 px
+- Margin: L10 R12 T4 B4; the slant lives entirely in the right column
 
 #### halftone.svg (panel overlay)
 

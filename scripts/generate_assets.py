@@ -58,11 +58,11 @@ class PanelGeometry:
     # Slanted end caps: how far a slab's bottom edge trails its top edge.
     skew: float = 12.0
     # Crimson backing slab: lower and further right, so it peeks out there.
-    red: tuple[float, float, float, float] = (3.0, 2.0, 457.0, 66.0)
+    red: tuple[float, float, float, float] = (3.0, 2.0, 448.0, 66.0)
     # White outline slab.
-    white: tuple[float, float, float, float] = (6.0, 6.0, 453.0, 62.0)
+    white: tuple[float, float, float, float] = (6.0, 6.0, 441.0, 62.0)
     # Black core slab, the text area.
-    black: tuple[float, float, float, float] = (10.0, 10.0, 450.0, 54.0)
+    black: tuple[float, float, float, float] = (10.0, 10.0, 438.0, 54.0)
     # Crimson pinstripe along the lower edge of the black slab.
     pinstripe_offset: float = 8.0
     pinstripe_h: float = 2.0
@@ -81,13 +81,17 @@ def svg_root(width: float, height: float, content: str) -> str:
 
 
 def svg_slab(rect: tuple[float, float, float, float], skew: float, fill: str) -> str:
-    """Emit one slab: a rectangle whose bottom edge trails left by `skew`."""
+    """Emit one slab: a rectangle whose bottom edge trails right by `skew`.
+
+    Left edges stay vertical, so no coordinate ever leaves the canvas on the
+    left; the slant lives entirely inside the right margin column.
+    """
     left, top, right, bottom = rect
     points = (
         (left, top),
         (right, top),
-        (right - skew, bottom),
-        (left - skew, bottom),
+        (right + skew, bottom),
+        (left + skew, bottom),
     )
     path = " ".join(f"{x:g},{y:g}" for x, y in points)
     return f'  <polygon points="{path}" fill="{fill}"/>\n'
@@ -105,9 +109,9 @@ def generate_panel(geometry: PanelGeometry = PANEL) -> str:
     content += svg_slab(black, g.skew, p.black)
     content += svg_slab(
         (
-            black[0],
+            black[0] + g.skew + 1.0,
             black[3] - g.pinstripe_offset - g.pinstripe_h,
-            black[2],
+            black[2] - 1.0,
             black[3] - g.pinstripe_offset,
         ),
         g.skew,
@@ -130,8 +134,8 @@ def generate_highlight(
     """
     del margin_left, margin_right
     p = PALETTE
-    red = (2.0, 2.0, width - 2.0, height - 4.0)
-    white = (4.0, 4.0, width - 6.0, height - 6.0)
+    red = (2.0, 2.0, width - 10.0, height - 4.0)
+    white = (4.0, 4.0, width - 14.0, height - 6.0)
     content = svg_slab(red, skew, p.crimson)
     content += svg_slab(white, skew, p.white)
     return svg_root(width, height, content)
